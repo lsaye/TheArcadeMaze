@@ -62,9 +62,7 @@ BTB_HIT_WINDOW = 30             # pixel tolerance for a "hit"
 BTB_LANE_W     = 90
 BTB_LANE_START = (SCREEN_W - BTB_LANES * BTB_LANE_W) // 2
 
-# ---------------------------------------------------------------------------
 # STORY TEXT
-# ---------------------------------------------------------------------------
 STORY_INTRO = [
     {
         "speaker": "Narrator",
@@ -259,9 +257,7 @@ STORY_AFTER_GAME3 = [
     },
 ]
 
-# ---------------------------------------------------------------------------
 # MAZE LAYOUT
-# ---------------------------------------------------------------------------
 # 1 = wall, 0 = open path, S = start, E = exit
 # 15 cols x 13 rows
 RAW_MAZE = [
@@ -303,9 +299,7 @@ def _parse_maze(raw):
 
 MAZE_GRID, MAZE_START, MAZE_EXIT = _parse_maze(RAW_MAZE)
 
-# ---------------------------------------------------------------------------
 # HELPER
-# ---------------------------------------------------------------------------
 def draw_text_wrapped(surface, text, font, color, rect, line_spacing=6):
     words_by_line = []
     for paragraph in text.split("\n"):
@@ -336,9 +330,7 @@ def draw_text_wrapped(surface, text, font, color, rect, line_spacing=6):
 
     return y
 
-# ---------------------------------------------------------------------------
 # SPRITES  — Token Rain
-# ---------------------------------------------------------------------------
 class Player(pygame.sprite.Sprite):
     """Jeffrey: the player-controlled character (Token Rain)."""
     WIDTH  = 30
@@ -396,9 +388,7 @@ class Token(pygame.sprite.Sprite):
         if self.rect.top > SCREEN_H:
             self.kill()
 
-# ---------------------------------------------------------------------------
 # SPRITES — Maze Run
-# ---------------------------------------------------------------------------
 class MazePlayer(pygame.sprite.Sprite):
     """Jeffrey: top-down sprite for Maze Run."""
     SIZE = 22
@@ -457,9 +447,7 @@ class MazePlayer(pygame.sprite.Sprite):
                 self.moving = False
             self.rect.center = (int(self.px), int(self.py))
 
-# ---------------------------------------------------------------------------
 # SPRITES — Beat the Beat
-# ---------------------------------------------------------------------------
 class BeatNote(pygame.sprite.Sprite):
     """A falling rhythm note in a specific lane."""
     RADIUS = 22
@@ -487,9 +475,7 @@ class BeatNote(pygame.sprite.Sprite):
         if self.rect.top > SCREEN_H:
             self.kill()
 
-# ---------------------------------------------------------------------------
 # MAIN GAME CLASS
-# ---------------------------------------------------------------------------
 class ArcadeMazeGame:
     """Main game controller — state machine + mini-game logic."""
 
@@ -517,7 +503,6 @@ class ArcadeMazeGame:
 
         self._reset_state()
 
-    # ------------------------------------------------------------------ sound
     def _gen_beep(self, freq, duration_ms):
         import array
         sample_rate = 44100
@@ -529,7 +514,6 @@ class ArcadeMazeGame:
             buf[i]  = int(amplitude * math.sin(2 * math.pi * freq * t))
         return pygame.mixer.Sound(buffer=buf)
 
-    # ------------------------------------------------------------------ state
     def _reset_state(self):
         self.state = STATE_MAIN_MENU
 
@@ -560,10 +544,10 @@ class ArcadeMazeGame:
         self.btb_misses     = 0
         self.btb_spawn_t    = 0
         self.btb_start      = 0.0
-        self.btb_flash      = {}    # lane -> frames remaining for flash
-        self.btb_feedback   = []    # list of (text, color, x, y, ttl)
+        self.btb_flash      = {}    
+        self.btb_feedback   = []    
 
-    # ------------------------------------------------------------------ story
+
     def _start_story(self, story_beats, next_state):
         self.story_queue      = story_beats
         self.story_index      = 0
@@ -591,7 +575,6 @@ class ArcadeMazeGame:
             elif self.next_state == STATE_BEAT_THE_BEAT:
                 self._init_beat_the_beat()
 
-    # ------------------------------------------------------------------ init
     def _init_token_rain(self):
         self.all_sprites = pygame.sprite.Group()
         self.token_group = pygame.sprite.Group()
@@ -619,7 +602,6 @@ class ArcadeMazeGame:
         self.btb_flash   = {i: 0 for i in range(BTB_LANES)}
         self.btb_feedback = []
 
-    # ------------------------------------------------------------------ loop
     def run(self):
         while True:
             self.clock.tick(FPS)
@@ -627,7 +609,6 @@ class ArcadeMazeGame:
             self._update()
             self._draw()
 
-    # ------------------------------------------------------------------ events
     def _handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -662,7 +643,6 @@ class ArcadeMazeGame:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit(); sys.exit()
 
-    # ------------------------------------------------------------------ update
     def _update(self):
         if self.state == STATE_TOKEN_RAIN:
             self._update_token_rain()
@@ -671,7 +651,6 @@ class ArcadeMazeGame:
         elif self.state == STATE_BEAT_THE_BEAT:
             self._update_beat_the_beat()
 
-    # ---- Token Rain
     def _update_token_rain(self):
         keys = pygame.key.get_pressed()
         self.player.update(keys)
@@ -702,7 +681,6 @@ class ArcadeMazeGame:
             except: pass
             self.state = STATE_LOSE
 
-    # ---- Maze Run
     def _update_maze_run(self):
         keys     = pygame.key.get_pressed()
         mp       = self.maze_player
@@ -731,7 +709,6 @@ class ArcadeMazeGame:
             except: pass
             self._start_story(STORY_AFTER_GAME2, STATE_BEAT_THE_BEAT)
 
-    # ---- Beat the Beat
     def _handle_btb_keydown(self, key):
         if key not in BTB_KEYS:
             return
@@ -800,7 +777,6 @@ class ArcadeMazeGame:
             except: pass
             self.state = STATE_LOSE
 
-    # ------------------------------------------------------------------ draw
     def _draw(self):
         if   self.state == STATE_MAIN_MENU:
             self._draw_main_menu()
@@ -820,7 +796,7 @@ class ArcadeMazeGame:
             self._draw_end()
         pygame.display.flip()
 
-    # ---- Main Menu
+    # Main Menu
     def _draw_main_menu(self):
         self.screen.fill(DARK_GRAY)
         self._draw_scanlines()
@@ -835,7 +811,7 @@ class ArcadeMazeGame:
         self.screen.blit(quit_txt, quit_txt.get_rect(center=(SCREEN_W // 2, 420)))
         pygame.draw.rect(self.screen, NEON_GREEN, (20, 20, SCREEN_W - 40, SCREEN_H - 40), 2)
 
-    # ---- Story Screen
+    # Story Screen
     def _draw_story(self):
         self.screen.fill(DARK_GRAY)
         self._draw_scanlines()
@@ -857,7 +833,7 @@ class ArcadeMazeGame:
         prog = self.font_small.render(f"{done_lines}/{total_lines}", True, MID_GRAY)
         self.screen.blit(prog, (50, 540))
 
-    # ---- Token Rain
+    # Token Rain
     def _draw_token_rain(self):
         self.screen.fill((5, 5, 25))
         for i in range(0, SCREEN_H, 40):
@@ -885,7 +861,7 @@ class ArcadeMazeGame:
         pygame.draw.rect(self.screen, MID_GRAY, (20, 52, SCREEN_W - 40, 8))
         pygame.draw.rect(self.screen, GOLD,     (20, 52, bar_w,         8))
 
-    # ---- Maze Run
+    # Maze Run
     def _draw_maze_run(self):
         self.screen.fill((5, 5, 25))
         self._draw_scanlines()
@@ -930,7 +906,7 @@ class ArcadeMazeGame:
         # draw player
         self.screen.blit(self.maze_player.image, self.maze_player.rect)
 
-        # HUD — title above maze, instructions below
+        # HUD: title above maze, instructions below
         title_txt = self.font_medium.render("REALM 2: MAZE RUN", True, NEON_BLUE)
         instr_txt = self.font_small.render("Arrow keys to move  |  Reach the EXIT portal", True, MID_GRAY)
         # Centre title in the space above the maze
@@ -941,7 +917,7 @@ class ArcadeMazeGame:
         self.screen.blit(instr_txt, instr_txt.get_rect(center=(SCREEN_W // 2, instr_y)))
         pygame.draw.rect(self.screen, NEON_BLUE, (20, 20, SCREEN_W - 40, SCREEN_H - 40), 2)
 
-    # ---- Beat the Beat
+    # Beat the Beat
     def _draw_beat_the_beat(self):
         self.screen.fill((10, 5, 25))
         self._draw_scanlines()
@@ -1001,7 +977,7 @@ class ArcadeMazeGame:
         pygame.draw.rect(self.screen, MID_GRAY, (20, 52, SCREEN_W - 40, 8))
         pygame.draw.rect(self.screen, NEON_PINK, (20, 52, bar_w,         8))
 
-    # ---- Win / Lose
+    # Win / Lose
     def _draw_result(self, won):
         self.screen.fill(DARK_GRAY)
         self._draw_scanlines()
@@ -1016,7 +992,7 @@ class ArcadeMazeGame:
         self.screen.blit(sub_surf, sub_surf.get_rect(center=(SCREEN_W // 2, 300)))
         self.screen.blit(r_surf,   r_surf.get_rect(  center=(SCREEN_W // 2, 400)))
 
-    # ---- End Screen
+    # End Screen
     def _draw_end(self):
         self.screen.fill(DARK_GRAY)
         self._draw_scanlines()
@@ -1036,16 +1012,14 @@ class ArcadeMazeGame:
             self.screen.blit(surf, surf.get_rect(center=(SCREEN_W // 2, y)))
         pygame.draw.rect(self.screen, NEON_PINK, (20, 20, SCREEN_W - 40, SCREEN_H - 40), 2)
 
-    # ---- Scanlines
+    # Scanlines
     def _draw_scanlines(self):
         scanline = pygame.Surface((SCREEN_W, 2), pygame.SRCALPHA)
         scanline.fill((0, 0, 0, 40))
         for y in range(0, SCREEN_H, 4):
             self.screen.blit(scanline, (0, y))
 
-# ---------------------------------------------------------------------------
 # ENTRY POINT
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     game = ArcadeMazeGame()
     game.run()
